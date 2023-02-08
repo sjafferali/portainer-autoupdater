@@ -100,7 +100,7 @@ jobs:
         uses: docker/build-push-action@v3
         with:
           context: .
-          file: {context}/dockerfiles/Dockerfile-dev
+          file: ./dockerfiles/Dockerfile-dev
           platforms: linux/amd64,linux/arm64
           push: true
           tags: sjafferali/portainer-autoupdater:latest-dev
