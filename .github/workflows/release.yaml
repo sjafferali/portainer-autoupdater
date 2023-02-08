@@ -49,7 +49,6 @@ jobs:
   releases-matrix:
     permissions:
       contents: write  # for wangyoucao577/go-release-action to upload release assets
-    needs: cleanup
     name: Release Go Binary
     runs-on: ubuntu-latest
     strategy:
