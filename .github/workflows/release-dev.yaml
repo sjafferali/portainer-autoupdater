@@ -104,6 +104,6 @@ jobs:
         with:
           context: .
           file: ./dockerfiles/Dockerfile-dev
-          platforms: linux/arm64
+          platforms: linux/arm64,linux/amd64
           push: true
           tags: sjafferali/portainer-autoupdater:latest-dev
