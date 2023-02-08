@@ -78,6 +78,9 @@ jobs:
           binary_name: autoupdater
           asset_name: "autoupdater-${{ env.BUILD_TIME }}-${{ matrix.goos }}-${{ matrix.goarch }}"
   docker:
+    needs:
+      - lint
+      - test
     runs-on: ubuntu-latest
     steps:
       -
