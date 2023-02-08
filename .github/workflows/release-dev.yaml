@@ -112,7 +112,7 @@ jobs:
         run: |
           mkdir -p ~/.docker/ && \
           echo '{"experimental": "enabled"}' > ~/.docker/config.json
-      - name: Create manifest for latest
+      - name: Create manifest for latest-dev
         run: |
           docker manifest create \
             sjafferali/portainer-autoupdater:latest-dev \
@@ -120,7 +120,7 @@ jobs:
             sjafferali/portainer-autoupdater:i386-latest-dev \
             sjafferali/portainer-autoupdater:armhf-latest-dev \
             sjafferali/portainer-autoupdater:arm64v8-latest-dev
-      - name: Annotate manifest for latest
+      - name: Annotate manifest for latest-dev
         run: |
           docker manifest annotate \
             sjafferali/portainer-autoupdater:latest-dev \

@@ -18,7 +18,7 @@ archives:
       darwin: macOS
       linux: linux
     files:
-      - LICENSE.md
+      - LICENSE
 dockers:
   -
     use_buildx: true
