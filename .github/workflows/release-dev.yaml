@@ -20,6 +20,19 @@ jobs:
         with:
           # Optional: version of golangci-lint to use in form of v1.2 or v1.2.3 or `latest` to use the latest version
           version: v1.50.1
+  govulncheck:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      security-events: write
+    steps:
+      - uses: actions/checkout@v3
+      - name: Running govulncheck
+        uses: Templum/govulncheck-action@v0.0.5
+        with:
+          go-version: 1.19
+          vulncheck-version: latest
+          package: ./...
   test:
     runs-on: ubuntu-latest
     steps:
@@ -34,6 +47,7 @@ jobs:
     needs:
       - lint
       - test
+      - govulncheck
     permissions:
       contents: write
     runs-on: ubuntu-latest
@@ -77,10 +91,11 @@ jobs:
           project_path: cmd/autoupdater
           binary_name: autoupdater
           asset_name: "autoupdater-${{ env.BUILD_TIME }}-${{ matrix.goos }}-${{ matrix.goarch }}"
-  docker:
+  docker-release:
     needs:
       - lint
       - test
+      - govulncheck
     runs-on: ubuntu-latest
     steps:
       -
