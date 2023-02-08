@@ -6,8 +6,6 @@ build:
   goarch:
     - amd64
     - arm64
-  ldflags:
-    - -s -w -X github.com/sjafferali/portainer-autoupdater/internal/meta.Version={{.Version}} -X github.com/sjafferali/portainer-autoupdater/internal/meta.Commit={{.Commit}}
 archives:
   - 
     name_template: "{{.ProjectName}}_{{.Os}}_{{.Arch}}"
@@ -28,7 +26,6 @@ dockers:
     goarm: ''
     dockerfile: Dockerfile
     image_templates:
-      - sjafferali/portainer-autoupdater:amd64-{{ .Version }}
       - sjafferali/portainer-autoupdater:amd64-latest-dev
     binaries:
       - autoupdater
@@ -40,7 +37,6 @@ dockers:
     goarm: ''
     dockerfile: Dockerfile
     image_templates:
-      - sjafferali/portainer-autoupdater:arm64v8-{{ .Version }}
       - sjafferali/portainer-autoupdater:arm64v8-latest-dev
     binaries:
       - autoupdater
