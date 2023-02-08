@@ -120,7 +120,7 @@ jobs:
           labels: ${{ steps.meta.outputs.labels }}
   renew-docs:
     name: Refresh pkg.go.dev
-    needs: build
+    needs: docker-release
     runs-on: ubuntu-latest
     steps:
     - name: Pull new module version
