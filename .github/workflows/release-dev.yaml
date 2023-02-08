@@ -104,7 +104,7 @@ jobs:
         uses: goreleaser/goreleaser-action@f82d6c1c344bcacabba2c841718984797f664a6b #v3
         with:
           version: v0.155.0
-          args: --debug
+          args: --debug --snapshot
         env:
           GORELEASER_CURRENT_TAG: latest-dev
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
