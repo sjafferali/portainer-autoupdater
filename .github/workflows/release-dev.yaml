@@ -117,8 +117,6 @@ jobs:
           docker manifest create \
             sjafferali/portainer-autoupdater:latest-dev \
             sjafferali/portainer-autoupdater:amd64-latest-dev \
-            sjafferali/portainer-autoupdater:i386-latest-dev \
-            sjafferali/portainer-autoupdater:armhf-latest-dev \
             sjafferali/portainer-autoupdater:arm64v8-latest-dev
       - name: Annotate manifest for latest-dev
         run: |
@@ -128,12 +126,6 @@ jobs:
             --os linux \
             --arch 386
       
-          docker manifest annotate \
-            sjafferali/portainer-autoupdater:latest-dev \
-            sjafferali/portainer-autoupdater:armhf-latest-dev \
-            --os linux \
-            --arch arm
-            
           docker manifest annotate \
             sjafferali/portainer-autoupdater:latest-dev \
             sjafferali/portainer-autoupdater:arm64v8-latest-dev \

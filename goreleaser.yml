@@ -29,7 +29,7 @@ dockers:
     dockerfile: Dockerfile
     image_templates:
       - sjafferali/portainer-autoupdater:amd64-{{ .Version }}
-      - sjafferali/portainer-autoupdater:amd64-latest
+      - sjafferali/portainer-autoupdater:amd64-latest-dev
     binaries:
       - autoupdater
   - 
@@ -41,6 +41,6 @@ dockers:
     dockerfile: Dockerfile
     image_templates:
       - sjafferali/portainer-autoupdater:arm64v8-{{ .Version }}
-      - sjafferali/portainer-autoupdater:arm64v8-latest
+      - sjafferali/portainer-autoupdater:arm64v8-latest-dev
     binaries:
       - autoupdater
