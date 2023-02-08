@@ -1,6 +1,6 @@
 build:
   main: github.com/sjafferali/portainer-autoupdater/cmd/autoupdater
-  binary: watchtower
+  binary: autoupdater
   goos:
     - linux
   goarch:
