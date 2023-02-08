@@ -1,0 +1,46 @@
+build:
+  main: cmd/autoupdater
+  binary: watchtower
+  goos:
+    - linux
+  goarch:
+    - amd64
+    - arm64
+  ldflags:
+    - -s -w -X github.com/sjafferali/portainer-autoupdater/internal/meta.Version={{.Version}} -X github.com/sjafferali/portainer-autoupdater/internal/meta.Commit={{.Commit}}
+archives:
+  - 
+    name_template: "{{.ProjectName}}_{{.Os}}_{{.Arch}}"
+    format: tar.gz
+    replacements:
+      arm64: arm64v8
+      amd64: amd64
+      darwin: macOS
+      linux: linux
+    files:
+      - LICENSE.md
+dockers:
+  -
+    use_buildx: true
+    build_flag_templates: [ "--platform=linux/amd64" ]
+    goos: linux
+    goarch: amd64
+    goarm: ''
+    dockerfile: Dockerfile
+    image_templates:
+      - sjafferali/portainer-autoupdater:amd64-{{ .Version }}
+      - sjafferali/portainer-autoupdater:amd64-latest
+    binaries:
+      - autoupdater
+  - 
+    use_buildx: true
+    build_flag_templates: [ "--platform=linux/arm64/v8" ]
+    goos: linux
+    goarch: arm64
+    goarm: ''
+    dockerfile: Dockerfile
+    image_templates:
+      - sjafferali/portainer-autoupdater:arm64v8-{{ .Version }}
+      - sjafferali/portainer-autoupdater:arm64v8-latest
+    binaries:
+      - autoupdater
