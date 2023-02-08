@@ -106,6 +106,7 @@ jobs:
           version: v0.155.0
           args: --debug
         env:
+          GORELEASER_CURRENT_TAG: latest-dev
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
       - name: Enable experimental docker features
         run: |
