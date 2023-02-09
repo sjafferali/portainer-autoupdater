@@ -10,10 +10,11 @@ import (
 	"net/http"
 	"time"
 
+	"github.com/pkg/errors"
 	portainer "github.com/portainer/portainer/api"
 )
 
-var defaultRequestTimeout = 30 * time.Second
+var defaultRequestTimeout = time.Minute * 2
 
 type Client interface {
 	Stacks(ctx context.Context) ([]Stack, error)
@@ -37,6 +38,7 @@ func (c *PortainerAPI) do(ctx context.Context, method, endpoint string, body []b
 	}
 
 	req.Header.Add("Accept", "application/json")
+	req.Header.Add("Content-Type", "application/json")
 	req.Header.Add("X-API-Key", c.token)
 
 	return c.client.Do(req)
@@ -187,10 +189,10 @@ func (c *PortainerAPI) updateGitStack(ctx context.Context, stack *Stack) error {
 
 	jsonRequest, err := json.Marshal(request)
 	if err != nil {
-		return err
+		return errors.Wrap(err, "marshalling request body to json")
 	}
 
-	if _, err := c.put(ctx, fmt.Sprintf("api/stacks/%d/git/redeploy", stack.ID), jsonRequest); err != nil {
+	if _, err := c.put(ctx, fmt.Sprintf("api/stacks/%d/git/redeploy?endpointId=%d", stack.ID, stack.EndpointID), jsonRequest); err != nil {
 		return err
 	}
 	return nil
@@ -207,7 +209,7 @@ type updateFileStackRequest struct {
 func (c *PortainerAPI) updateFileStack(ctx context.Context, stack *Stack) error {
 	fileContents, err := c.StackFileContent(ctx, int(stack.ID))
 	if err != nil {
-		return err
+		return errors.Wrap(err, "getting stack file contents")
 	}
 
 	request := updateFileStackRequest{
@@ -220,11 +222,11 @@ func (c *PortainerAPI) updateFileStack(ctx context.Context, stack *Stack) error 
 
 	jsonRequest, err := json.Marshal(request)
 	if err != nil {
-		return err
+		return errors.Wrap(err, "marshalling request body to json")
 	}
 
-	if _, err := c.put(ctx, fmt.Sprintf("api/stacks/%d", stack.ID), jsonRequest); err != nil {
-		return err
+	if _, err := c.put(ctx, fmt.Sprintf("api/stacks/%d?endpointId=%d", stack.ID, stack.EndpointID), jsonRequest); err != nil {
+		return errors.Wrap(err, "updating stack")
 	}
 	return nil
 }
