@@ -13,7 +13,7 @@
 
 </div>
 
-## Application
+## Usage
 
 With portainer-autoupdater you can update the running version of your containerized app simply by pushing a new image to the Docker Hub or your own image registry.
 
@@ -28,7 +28,10 @@ The autoupdater app will query the portainer API, then trigger a  update on the 
 - User/Password Authentication
 - Auto updating of containers (non-swarm only)
 
-## Usage
+### Why not Watchtower?
+Placeholder
+
+## Examples
 
 ### Minimal Compose
 ```
