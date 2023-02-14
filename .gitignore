@@ -28,5 +28,5 @@ go.work
 
 .idea/
 
-autoupdater
-autoupdater-*
+/autoupdater
+/autoupdater-*
