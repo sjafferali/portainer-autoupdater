@@ -10,18 +10,30 @@ import (
 	"net/http"
 	"time"
 
+	dockertypes "github.com/docker/docker/api/types"
+	"github.com/docker/docker/api/types/filters"
+	"github.com/docker/docker/api/types/swarm"
 	"github.com/pkg/errors"
 	portainer "github.com/portainer/portainer/api"
+	"github.com/rs/zerolog"
 )
 
 var defaultRequestTimeout = time.Minute * 2
 
 type Client interface {
-	Stacks(ctx context.Context) ([]Stack, error)
-	Stack(ctx context.Context, stackID int) (*Stack, error)
-	StackFileContent(ctx context.Context, stackID int) (string, error)
-	StackImageStatus(ctx context.Context, stackID int) (string, error)
-	UpdateStack(ctx context.Context, stackID int) error
+	Endpoints(ctx context.Context, ll zerolog.Logger) ([]portainer.Endpoint, error)
+	Stacks(ctx context.Context, ll zerolog.Logger) ([]Stack, error)
+	Stack(ctx context.Context, stackID int, ll zerolog.Logger) (*Stack, error)
+	StackFileContent(ctx context.Context, stackID int, ll zerolog.Logger) (string, error)
+	StackImageStatus(ctx context.Context, stackID int, ll zerolog.Logger) (string, error)
+	UpdateStack(ctx context.Context, stackID int, ll zerolog.Logger) error
+	UpdateService(ctx context.Context, serviceID string, endpoint int, ll zerolog.Logger) error
+	ContainersForStack(ctx context.Context, stack Stack, ll zerolog.Logger) ([]dockertypes.Container, error)
+	Containers(ctx context.Context, endpointID int, ll zerolog.Logger) ([]dockertypes.Container, error)
+	ContainerImageStatus(ctx context.Context, containerID string, endpoint int, ll zerolog.Logger) (string, error)
+	ServicesForStack(ctx context.Context, stack Stack, ll zerolog.Logger) ([]swarm.Service, error)
+	Services(ctx context.Context, endpointID int, ll zerolog.Logger) ([]swarm.Service, error)
+	ServiceImageStatus(ctx context.Context, serviceID string, endpoint int, ll zerolog.Logger) (string, error)
 }
 
 type PortainerAPI struct {
@@ -30,12 +42,18 @@ type PortainerAPI struct {
 	host   string
 }
 
-func (c *PortainerAPI) do(ctx context.Context, method, endpoint string, body []byte) (*http.Response, error) {
+func (c *PortainerAPI) do(ctx context.Context, method, endpoint string, queryMap map[string]string, body []byte, ll zerolog.Logger) (*http.Response, error) {
 	baseURL := fmt.Sprintf("%s/%s", c.host, endpoint)
 	req, err := http.NewRequestWithContext(ctx, method, baseURL, bytes.NewBuffer(body))
 	if err != nil {
 		return nil, err
 	}
+
+	q := req.URL.Query()
+	for key, value := range queryMap {
+		q.Add(key, value)
+	}
+	req.URL.RawQuery = q.Encode()
 
 	req.Header.Add("Accept", "application/json")
 	req.Header.Add("Content-Type", "application/json")
@@ -44,8 +62,8 @@ func (c *PortainerAPI) do(ctx context.Context, method, endpoint string, body []b
 	return c.client.Do(req)
 }
 
-func (c *PortainerAPI) put(ctx context.Context, endpoint string, body []byte) ([]byte, error) {
-	res, err := c.do(ctx, http.MethodPut, endpoint, body)
+func (c *PortainerAPI) put(ctx context.Context, endpoint string, body []byte, ll zerolog.Logger) ([]byte, error) {
+	res, err := c.do(ctx, http.MethodPut, endpoint, nil, body, ll)
 	if err != nil {
 		return nil, err
 	}
@@ -66,8 +84,8 @@ func (c *PortainerAPI) put(ctx context.Context, endpoint string, body []byte) ([
 	return respbody, nil
 }
 
-func (c *PortainerAPI) get(ctx context.Context, endpoint string) ([]byte, error) {
-	res, err := c.do(ctx, http.MethodGet, endpoint, nil)
+func (c *PortainerAPI) get(ctx context.Context, endpoint string, queryMap map[string]string, ll zerolog.Logger) ([]byte, error) {
+	res, err := c.do(ctx, http.MethodGet, endpoint, queryMap, nil, ll)
 	if err != nil {
 		return nil, err
 	}
@@ -88,13 +106,27 @@ func (c *PortainerAPI) get(ctx context.Context, endpoint string) ([]byte, error)
 	return body, nil
 }
 
+func (c *PortainerAPI) Endpoints(ctx context.Context, ll zerolog.Logger) ([]portainer.Endpoint, error) {
+	response, err := c.get(ctx, "api/endpoints", nil, ll)
+	if err != nil {
+		return nil, err
+	}
+
+	var results []portainer.Endpoint
+	if err := json.Unmarshal(response, &results); err != nil {
+		return nil, err
+	}
+
+	return results, nil
+}
+
 type Stack struct {
 	portainer.Stack
 	Webhook string `json:"Webhook"`
 }
 
-func (c *PortainerAPI) Stacks(ctx context.Context) ([]Stack, error) {
-	response, err := c.get(ctx, "api/stacks")
+func (c *PortainerAPI) Stacks(ctx context.Context, ll zerolog.Logger) ([]Stack, error) {
+	response, err := c.get(ctx, "api/stacks", nil, ll)
 	if err != nil {
 		return nil, err
 	}
@@ -107,8 +139,8 @@ func (c *PortainerAPI) Stacks(ctx context.Context) ([]Stack, error) {
 	return results, nil
 }
 
-func (c *PortainerAPI) Stack(ctx context.Context, stackID int) (*Stack, error) {
-	response, err := c.get(ctx, fmt.Sprintf("api/stacks/%d", stackID))
+func (c *PortainerAPI) Stack(ctx context.Context, stackID int, ll zerolog.Logger) (*Stack, error) {
+	response, err := c.get(ctx, fmt.Sprintf("api/stacks/%d", stackID), nil, ll)
 	if err != nil {
 		return nil, err
 	}
@@ -125,8 +157,8 @@ type stackFileContentsResponse struct {
 	StackFileContent string `json:"StackFileContent"`
 }
 
-func (c *PortainerAPI) StackFileContent(ctx context.Context, stackID int) (string, error) {
-	response, err := c.get(ctx, fmt.Sprintf("api/stacks/%d/file", stackID))
+func (c *PortainerAPI) StackFileContent(ctx context.Context, stackID int, ll zerolog.Logger) (string, error) {
+	response, err := c.get(ctx, fmt.Sprintf("api/stacks/%d/file", stackID), nil, ll)
 	if err != nil {
 		return "", err
 	}
@@ -143,8 +175,8 @@ type imageStatusResponse struct {
 	Status string `json:"Status"`
 }
 
-func (c *PortainerAPI) StackImageStatus(ctx context.Context, stackID int) (string, error) {
-	response, err := c.get(ctx, fmt.Sprintf("api/stacks/%d/images_status", stackID))
+func (c *PortainerAPI) StackImageStatus(ctx context.Context, stackID int, ll zerolog.Logger) (string, error) {
+	response, err := c.get(ctx, fmt.Sprintf("api/stacks/%d/images_status", stackID), nil, ll)
 	if err != nil {
 		return "", err
 	}
@@ -155,6 +187,106 @@ func (c *PortainerAPI) StackImageStatus(ctx context.Context, stackID int) (strin
 	}
 
 	return result.Status, nil
+}
+
+func (c *PortainerAPI) ContainerImageStatus(ctx context.Context, containerID string, endpoint int, ll zerolog.Logger) (string, error) {
+	response, err := c.get(ctx, fmt.Sprintf("api/docker/%d/containers/%s/image_status", endpoint, containerID), nil, ll)
+	if err != nil {
+		return "", err
+	}
+
+	result := new(imageStatusResponse)
+	if err := json.Unmarshal(response, &result); err != nil {
+		return "", err
+	}
+
+	return result.Status, nil
+}
+
+func (c *PortainerAPI) ServiceImageStatus(ctx context.Context, serviceID string, endpoint int, ll zerolog.Logger) (string, error) {
+	response, err := c.get(ctx, fmt.Sprintf("api/docker/%d/services/%s/image_status", endpoint, serviceID), nil, ll)
+	if err != nil {
+		return "", err
+	}
+
+	result := new(imageStatusResponse)
+	if err := json.Unmarshal(response, &result); err != nil {
+		return "", err
+	}
+
+	return result.Status, nil
+}
+
+func (c *PortainerAPI) ContainersForStack(ctx context.Context, stack Stack, ll zerolog.Logger) ([]dockertypes.Container, error) {
+	query := make(map[string]string)
+	args := filters.NewArgs(filters.Arg("label", fmt.Sprintf("com.docker.compose.project=%s", stack.Name)))
+	filtersStr, err := filters.ToJSON(args)
+	if err != nil {
+		return nil, err
+	}
+
+	query["filters"] = filtersStr
+	response, err := c.get(ctx, fmt.Sprintf("api/endpoints/%d/docker/containers/json", stack.EndpointID), query, ll)
+	if err != nil {
+		return nil, err
+	}
+
+	var result []dockertypes.Container
+	if err := json.Unmarshal(response, &result); err != nil {
+		return nil, err
+	}
+
+	return result, nil
+}
+
+func (c *PortainerAPI) Containers(ctx context.Context, endpointID int, ll zerolog.Logger) ([]dockertypes.Container, error) {
+	response, err := c.get(ctx, fmt.Sprintf("api/endpoints/%d/docker/containers/json", endpointID), nil, ll)
+	if err != nil {
+		return nil, err
+	}
+
+	var result []dockertypes.Container
+	if err := json.Unmarshal(response, &result); err != nil {
+		return nil, err
+	}
+
+	return result, nil
+}
+
+func (c *PortainerAPI) Services(ctx context.Context, endpointID int, ll zerolog.Logger) ([]swarm.Service, error) {
+	response, err := c.get(ctx, fmt.Sprintf("api/endpoints/%d/docker/services", endpointID), nil, ll)
+	if err != nil {
+		return nil, err
+	}
+
+	var result []swarm.Service
+	if err := json.Unmarshal(response, &result); err != nil {
+		return nil, err
+	}
+
+	return result, nil
+}
+
+func (c *PortainerAPI) ServicesForStack(ctx context.Context, stack Stack, ll zerolog.Logger) ([]swarm.Service, error) {
+	query := make(map[string]string)
+	args := filters.NewArgs(filters.Arg("label", fmt.Sprintf("com.docker.stack.namespace=%s", stack.Name)))
+	filtersStr, err := filters.ToJSON(args)
+	if err != nil {
+		return nil, err
+	}
+
+	query["filters"] = filtersStr
+	response, err := c.get(ctx, fmt.Sprintf("api/endpoints/%d/docker/services", stack.EndpointID), query, ll)
+	if err != nil {
+		return nil, err
+	}
+
+	var result []swarm.Service
+	if err := json.Unmarshal(response, &result); err != nil {
+		return nil, err
+	}
+
+	return result, nil
 }
 
 type updateGitStackRequest struct {
@@ -168,7 +300,7 @@ type updateGitStackRequest struct {
 	RepositoryUsername        string           `json:"repositoryUsername"`
 }
 
-func (c *PortainerAPI) updateGitStack(ctx context.Context, stack *Stack) error {
+func (c *PortainerAPI) updateGitStack(ctx context.Context, stack *Stack, ll zerolog.Logger) error {
 	request := updateGitStackRequest{
 		Env:                       stack.Env,
 		Prune:                     true,
@@ -192,7 +324,11 @@ func (c *PortainerAPI) updateGitStack(ctx context.Context, stack *Stack) error {
 		return errors.Wrap(err, "marshalling request body to json")
 	}
 
-	if _, err := c.put(ctx, fmt.Sprintf("api/stacks/%d/git/redeploy?endpointId=%d", stack.ID, stack.EndpointID), jsonRequest); err != nil {
+	if _, err := c.put(ctx, fmt.Sprintf(
+		"api/stacks/%d/git/redeploy?endpointId=%d",
+		stack.ID,
+		stack.EndpointID,
+	), jsonRequest, ll); err != nil {
 		return err
 	}
 	return nil
@@ -206,8 +342,8 @@ type updateFileStackRequest struct {
 	Webhook          string           `json:"webhook"`
 }
 
-func (c *PortainerAPI) updateFileStack(ctx context.Context, stack *Stack) error {
-	fileContents, err := c.StackFileContent(ctx, int(stack.ID))
+func (c *PortainerAPI) updateFileStack(ctx context.Context, stack *Stack, ll zerolog.Logger) error {
+	fileContents, err := c.StackFileContent(ctx, int(stack.ID), ll)
 	if err != nil {
 		return errors.Wrap(err, "getting stack file contents")
 	}
@@ -225,24 +361,53 @@ func (c *PortainerAPI) updateFileStack(ctx context.Context, stack *Stack) error 
 		return errors.Wrap(err, "marshalling request body to json")
 	}
 
-	if _, err := c.put(ctx, fmt.Sprintf("api/stacks/%d?endpointId=%d", stack.ID, stack.EndpointID), jsonRequest); err != nil {
+	if _, err := c.put(ctx, fmt.Sprintf(
+		"api/stacks/%d?endpointId=%d",
+		stack.ID,
+		stack.EndpointID,
+	), jsonRequest, ll); err != nil {
 		return errors.Wrap(err, "updating stack")
 	}
 	return nil
 }
 
-func (c *PortainerAPI) UpdateStack(ctx context.Context, stackID int) error {
-	stack, err := c.Stack(ctx, stackID)
+func (c *PortainerAPI) UpdateStack(ctx context.Context, stackID int, ll zerolog.Logger) error {
+	stack, err := c.Stack(ctx, stackID, ll)
 	if err != nil {
 		return err
 	}
 
 	switch {
 	case stack.GitConfig != nil:
-		return c.updateGitStack(ctx, stack)
+		return c.updateGitStack(ctx, stack, ll)
 	default:
-		return c.updateFileStack(ctx, stack)
+		return c.updateFileStack(ctx, stack, ll)
 	}
+}
+
+type forceUpdateServiceRequest struct {
+	PullImage bool   `json:"pullImage"`
+	ServiceID string `json:"serviceID"`
+}
+
+func (c *PortainerAPI) UpdateService(ctx context.Context, serviceID string, endpointID int, ll zerolog.Logger) error {
+	request := forceUpdateServiceRequest{
+		PullImage: true,
+		ServiceID: serviceID,
+	}
+
+	jsonRequest, err := json.Marshal(request)
+	if err != nil {
+		return errors.Wrap(err, "marshalling request body to json")
+	}
+
+	if _, err := c.put(ctx, fmt.Sprintf(
+		"api/endpoints/%d/forceupdateservice",
+		endpointID,
+	), jsonRequest, ll); err != nil {
+		return errors.Wrap(err, "updating service")
+	}
+	return nil
 }
 
 func NewPortainerAPIClient(token, host string) *PortainerAPI {

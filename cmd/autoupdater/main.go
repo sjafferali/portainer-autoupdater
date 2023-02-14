@@ -10,18 +10,28 @@ import (
 	"github.com/pkg/errors"
 	"github.com/rs/zerolog"
 	"github.com/rs/zerolog/log"
+	"github.com/sjafferali/portainer-autoupdater/internal/meta"
 	"github.com/sjafferali/portainer-autoupdater/internal/portainerapi"
 )
 
 type ConfigSpecification struct {
-	Interval      time.Duration `default:"300s" desc:"how often to run app"`
-	DryRun        bool          `default:"true" split_words:"true" desc:"only print updates that will be performed"`
-	Endpoint      string        `required:"true" desc:"portainer api endpoint"`
-	Token         string        `required:"true" desc:"portainer token to use for authentication"`
-	LogLevel      string        `default:"INFO" desc:"loglevel to print logs with"`
-	EnableStacks  bool          `default:"true" split_words:"true" desc:"enable checking for stack updates"`
-	ExcludeStacks []int         `split_words:"true" desc:"stack IDs of stacks that should be excluded from auto update"`
-	IncludeStacks []int         `split_words:"true" desc:"stack IDs of stacks that should be included from checks; if not set, all stacks are included"`
+	Interval time.Duration `default:"300s" desc:"how often to run app"`
+	DryRun   bool          `default:"true" split_words:"true" desc:"only print updates that will be performed"`
+	Endpoint string        `required:"true" desc:"portainer api endpoint"`
+	Token    string        `required:"true" desc:"portainer token to use for authentication"`
+	LogLevel string        `default:"INFO" desc:"loglevel to print logs with"`
+
+	EnableStacks      bool     `default:"true" split_words:"true" desc:"enable checking for stack updates"`
+	ExcludeStackIDs   []int    `split_words:"true" desc:"stack IDs of stacks that should be excluded from auto update"`
+	IncludeStackIDs   []int    `split_words:"true" desc:"stack IDs of stacks that should be included from checks; if not set, all stacks are included"`
+	ExcludeStackNames []string `split_words:"true" desc:"stack names of stacks that should be excluded from auto update"`
+	IncludeStackNames []string `split_words:"true" desc:"stack names of stacks that should be included from checks; if not set, all stacks are included"`
+
+	EnableServices      bool     `default:"true" split_words:"true" desc:"enable checking for service updates (swarm only)"`
+	ExcludeServiceIDs   []string `split_words:"true" desc:"service IDs of services that should be excluded from auto update"`
+	IncludeServiceIDs   []string `split_words:"true" desc:"service IDs of services that should be included from checks; if not set, all services are included"`
+	ExcludeServiceNames []string `split_words:"true" desc:"service names of services that should be excluded from auto update"`
+	IncludeServiceNames []string `split_words:"true" desc:"service names of services that should be included from checks; if not set, all services are included"`
 }
 
 func main() {
@@ -41,15 +51,41 @@ func main() {
 
 	ctx := context.Background()
 
+	ll := log.With().Str("version", meta.Version).Logger()
+
 	client := portainerapi.NewPortainerAPIClient(s.Token, s.Endpoint)
 	for {
 		if s.EnableStacks {
-			if err := upgradeStacks(ctx, client, s.DryRun, s.ExcludeStacks, s.IncludeStacks); err != nil {
+			if err := upgradeStacks(
+				ctx,
+				client,
+				s.DryRun,
+				s.ExcludeStackIDs,
+				s.IncludeStackIDs,
+				s.ExcludeStackNames,
+				s.IncludeStackNames,
+				ll,
+			); err != nil {
 				log.Fatal().Err(err).Msg("error running through stacks")
 			}
 		}
 
-		log.Debug().Dur("interval", s.Interval).Msg("sleeping")
+		if s.EnableServices {
+			if err := upgradeServices(
+				ctx,
+				client,
+				s.DryRun,
+				s.ExcludeServiceIDs,
+				s.IncludeServiceIDs,
+				s.ExcludeServiceNames,
+				s.IncludeServiceNames,
+				ll,
+			); err != nil {
+				log.Fatal().Err(err).Msg("error running through services")
+			}
+		}
+
+		ll.Debug().Dur("interval", s.Interval).Msg("sleeping")
 		time.Sleep(s.Interval)
 	}
 }
