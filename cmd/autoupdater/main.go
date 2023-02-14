@@ -22,14 +22,14 @@ type ConfigSpecification struct {
 	LogLevel string        `default:"INFO" desc:"loglevel to print logs with"`
 
 	EnableStacks      bool     `default:"true" split_words:"true" desc:"enable checking for stack updates"`
-	ExcludeStackIDs   []int    `split_words:"true" desc:"stack IDs of stacks that should be excluded from auto update"`
-	IncludeStackIDs   []int    `split_words:"true" desc:"stack IDs of stacks that should be included from checks; if not set, all stacks are included"`
+	ExcludeStackIds   []int    `split_words:"true" desc:"stack IDs of stacks that should be excluded from auto update"`
+	IncludeStackIds   []int    `split_words:"true" desc:"stack IDs of stacks that should be included from checks; if not set, all stacks are included"`
 	ExcludeStackNames []string `split_words:"true" desc:"stack names of stacks that should be excluded from auto update"`
 	IncludeStackNames []string `split_words:"true" desc:"stack names of stacks that should be included from checks; if not set, all stacks are included"`
 
 	EnableServices      bool     `default:"true" split_words:"true" desc:"enable checking for service updates (swarm only)"`
-	ExcludeServiceIDs   []string `split_words:"true" desc:"service IDs of services that should be excluded from auto update"`
-	IncludeServiceIDs   []string `split_words:"true" desc:"service IDs of services that should be included from checks; if not set, all services are included"`
+	ExcludeServiceIds   []string `split_words:"true" desc:"service IDs of services that should be excluded from auto update"`
+	IncludeServiceIds   []string `split_words:"true" desc:"service IDs of services that should be included from checks; if not set, all services are included"`
 	ExcludeServiceNames []string `split_words:"true" desc:"service names of services that should be excluded from auto update"`
 	IncludeServiceNames []string `split_words:"true" desc:"service names of services that should be included from checks; if not set, all services are included"`
 }
@@ -60,8 +60,8 @@ func main() {
 				ctx,
 				client,
 				s.DryRun,
-				s.ExcludeStackIDs,
-				s.IncludeStackIDs,
+				s.ExcludeStackIds,
+				s.IncludeStackIds,
 				s.ExcludeStackNames,
 				s.IncludeStackNames,
 				ll,
@@ -75,8 +75,8 @@ func main() {
 				ctx,
 				client,
 				s.DryRun,
-				s.ExcludeServiceIDs,
-				s.IncludeServiceIDs,
+				s.ExcludeServiceIds,
+				s.IncludeServiceIds,
 				s.ExcludeServiceNames,
 				s.IncludeServiceNames,
 				ll,
