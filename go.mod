@@ -3,7 +3,7 @@ module github.com/sjafferali/portainer-autoupdater
 go 1.19
 
 require (
-	github.com/docker/docker v20.10.16+incompatible
+	github.com/docker/docker v24.0.9+incompatible
 	github.com/kelseyhightower/envconfig v1.4.0
 	github.com/pkg/errors v0.9.1
 	github.com/portainer/portainer/api v0.0.0-20230207101352-e2168d21c7af
