@@ -52,6 +52,7 @@ version: '3.8'
 services:
   autoupdater:
     image: sjafferali/portainer-autoupdater:latest
+    container_name: autoupdater
     restart: unless-stopped
     environment:
       - AUTOUPDATER_INTERVAL=300s
