@@ -176,7 +176,7 @@ type imageStatusResponse struct {
 }
 
 func (c *PortainerAPI) StackImageStatus(ctx context.Context, stackID int, ll zerolog.Logger) (string, error) {
-	response, err := c.get(ctx, fmt.Sprintf("api/stacks/%d/images_status", stackID), nil, ll)
+	response, err := c.get(ctx, fmt.Sprintf("api/stacks/%d/images_status?refresh=true", stackID), nil, ll)
 	if err != nil {
 		return "", err
 	}
@@ -190,7 +190,7 @@ func (c *PortainerAPI) StackImageStatus(ctx context.Context, stackID int, ll zer
 }
 
 func (c *PortainerAPI) ContainerImageStatus(ctx context.Context, containerID string, endpoint int, ll zerolog.Logger) (string, error) {
-	response, err := c.get(ctx, fmt.Sprintf("api/docker/%d/containers/%s/image_status", endpoint, containerID), nil, ll)
+	response, err := c.get(ctx, fmt.Sprintf("api/docker/%d/containers/%s/image_status?refresh=true", endpoint, containerID), nil, ll)
 	if err != nil {
 		return "", err
 	}
@@ -204,7 +204,7 @@ func (c *PortainerAPI) ContainerImageStatus(ctx context.Context, containerID str
 }
 
 func (c *PortainerAPI) ServiceImageStatus(ctx context.Context, serviceID string, endpoint int, ll zerolog.Logger) (string, error) {
-	response, err := c.get(ctx, fmt.Sprintf("api/docker/%d/services/%s/image_status", endpoint, serviceID), nil, ll)
+	response, err := c.get(ctx, fmt.Sprintf("api/docker/%d/services/%s/image_status?refresh=true", endpoint, serviceID), nil, ll)
 	if err != nil {
 		return "", err
 	}
