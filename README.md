@@ -15,7 +15,7 @@
 
 ## Usage
 
-With portainer-autoupdater you can update the running version of your containerized app simply by pushing a new image to the Docker Hub or your own image registry.
+With portainer-autoupdater you can update the running version of your containerized app simply by pushing a new image to the Docker Hub or your own image registry. Unlike watchtower, and other similar tools, this makes use of the portainer API for all checks as well as upgrades which ensures portainer will always be up to date with all updates performed.
 
 The autoupdater app will query the portainer API, then trigger a  update on the stack, service or container to perform the update.
 
@@ -29,7 +29,7 @@ The autoupdater app will query the portainer API, then trigger a  update on the 
 - Auto updating of containers (non-swarm only)
 
 ### Why not Watchtower?
-Placeholder
+Watchtower and other docker auto-update tools use docker directly for checking for updates as well as performing updates. This app is specifically for systems being managed by portainer as the update process makes use of the portainer API for all checks and updates. 
 
 ## Examples
 
