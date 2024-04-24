@@ -65,28 +65,26 @@ func main() {
 				s.IncludeStackIds,
 				s.ExcludeStackNames,
 				s.IncludeStackNames,
+				s.Interval,
 				ll,
 			); err != nil {
 				log.Fatal().Err(err).Msg("error running through stacks")
 			}
 		}
 
-		if s.EnableServices {
-			if err := upgradeServices(
-				ctx,
-				client,
-				s.DryRun,
-				s.ExcludeServiceIds,
-				s.IncludeServiceIds,
-				s.ExcludeServiceNames,
-				s.IncludeServiceNames,
-				ll,
-			); err != nil {
-				log.Fatal().Err(err).Msg("error running through services")
-			}
-		}
-
-		ll.Debug().Dur("interval", s.Interval).Msg("sleeping")
-		time.Sleep(s.Interval)
+		//if s.EnableServices {
+		//	if err := upgradeServices(
+		//	ctx,
+		//	client,
+		//	s.DryRun,
+		//		s.ExcludeServiceIds,
+		//		s.IncludeServiceIds,
+		//		s.ExcludeServiceNames,
+		//		s.IncludeServiceNames,
+		//		ll,
+		//	); err != nil {
+		//		log.Fatal().Err(err).Msg("error running through services")
+		//	}
+		//}
 	}
 }
