@@ -52,6 +52,7 @@ func main() {
 	ctx := context.Background()
 
 	ll := log.With().Str("version", meta.Version).Logger()
+	ll.Trace().Dur("interval", s.Interval).Msg("interval")
 
 	client := portainerapi.NewPortainerAPIClient(s.Token, s.Endpoint)
 	for {
