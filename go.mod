@@ -3,7 +3,8 @@ module github.com/sjafferali/portainer-autoupdater
 go 1.22.2
 
 require (
-	github.com/docker/docker v26.0.2+incompatible
+	github.com/docker/docker v26.1.5+incompatible
+	github.com/grab/async v0.0.5
 	github.com/kelseyhightower/envconfig v1.4.0
 	github.com/pkg/errors v0.9.1
 	github.com/portainer/portainer v0.6.1-0.20240421223519-ffc66647f867
@@ -17,7 +18,6 @@ require (
 	github.com/gogo/protobuf v1.3.2 // indirect
 	github.com/golang/protobuf v1.5.4 // indirect
 	github.com/google/gofuzz v1.2.0 // indirect
-	github.com/grab/async v0.0.5 // indirect
 	github.com/json-iterator/go v1.1.12 // indirect
 	github.com/mattn/go-colorable v0.1.13 // indirect
 	github.com/mattn/go-isatty v0.0.20 // indirect
