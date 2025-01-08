@@ -28,7 +28,7 @@ jobs:
     steps:
       - uses: actions/checkout@v4
       - name: Running govulncheck
-        uses: Templum/govulncheck-action@v1.0.0
+        uses: Templum/govulncheck-action@v1.0.2
         with:
           go-version: 1.22.2
           vulncheck-version: latest
