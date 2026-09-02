@@ -16,7 +16,7 @@ jobs:
     steps:
       - uses: actions/setup-go@v5
         with:
-          go-version: 1.22.2
+          go-version: 1.27.1
       - uses: actions/checkout@v4
       - name: golangci-lint
         uses: golangci/golangci-lint-action@v4
@@ -43,7 +43,7 @@ jobs:
       - name: Set up Go
         uses: actions/setup-go@v5
         with:
-          go-version: 1.22
+          go-version: 1.27
       - name: Test
         run: go test -v -coverprofile coverage.out -covermode atomic ./... 
   releases-matrix:
