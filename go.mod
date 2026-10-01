@@ -3,7 +3,7 @@ module github.com/sjafferali/portainer-autoupdater
 go 1.22.2
 
 require (
-	github.com/docker/docker v26.0.2+incompatible
+	github.com/docker/docker v28.0.0+incompatible
 	github.com/kelseyhightower/envconfig v1.4.0
 	github.com/pkg/errors v0.9.1
 	github.com/portainer/portainer v0.6.1-0.20240421223519-ffc66647f867
