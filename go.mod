@@ -6,7 +6,7 @@ require (
 	github.com/docker/docker v26.0.2+incompatible
 	github.com/kelseyhightower/envconfig v1.4.0
 	github.com/pkg/errors v0.9.1
-	github.com/portainer/portainer v0.6.1-0.20240421223519-ffc66647f867
+	github.com/portainer/portainer v0.10.1
 	github.com/rs/zerolog v1.32.0
 )
 
