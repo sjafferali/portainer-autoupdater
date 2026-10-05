@@ -59,6 +59,12 @@ github.com/pmezard/go-difflib v1.0.0 h1:4DBwDE0NGyQoBHbLQYPwSUPoCMWR5BEzIk/f1lZb
 github.com/pmezard/go-difflib v1.0.0/go.mod h1:iKH77koFhYxTK1pcRnkKkqfTogsbg7gZNVY4sRDYZ/4=
 github.com/portainer/portainer v0.6.1-0.20240421223519-ffc66647f867 h1:vcnPCaxXntBhLw57uFhRnCGFtU9VepAfuXe8BIj3vwk=
 github.com/portainer/portainer v0.6.1-0.20240421223519-ffc66647f867/go.mod h1:AeF9ey0EZ44IK7+kuwCFwcmfY12PfCwmJs57r9STj6s=
+github.com/portainer/portainer v0.10.1 h1:I8K345CjGWfUGsVA8c8/gqamwLCC6CIAjxZXSklAFq0=
+github.com/portainer/portainer v0.10.1/go.mod h1:XXujMKBnBMNC9Et0mL41InhBxITYiKNqxpj39e9fz/w=
+github.com/portainer/portainer/api v0.0.0-20230831224222-4560a53317b0 h1:PlzaprjVf2KYPDX8iUzxyPOnnB3kJrMDTa9NByljX2Q=
+github.com/portainer/portainer/api v0.0.0-20230831224222-4560a53317b0/go.mod h1:2Gz0Z211wS568RkKm/vWaoqfyiikfrlkIAV0qhBv6DI=
+github.com/portainer/portainer/pkg/featureflags v0.0.0-20230711022654-64b227b2e146 h1:8JVXjyFhGgSogKGOddnOROZxBEeWNvvo3EPT9uIJ2Xo=
+github.com/portainer/portainer/pkg/featureflags v0.0.0-20230711022654-64b227b2e146/go.mod h1:x4Lpq/BjFhZmuNB8e8FO0ObRPQ/Z/V9rTe54bMedf1A=
 github.com/rogpeppe/go-internal v1.10.0 h1:TMyTOH3F/DB16zRVcYyreMH6GnZZrwQVAoYjRBZyWFQ=
 github.com/rogpeppe/go-internal v1.10.0/go.mod h1:UQnix2H7Ngw/k4C5ijL5+65zddjncjaFoBhdsK/akog=
 github.com/rs/xid v1.5.0/go.mod h1:trrq9SKmegXys3aeAKXMUTdJsYXVwGY3RLcfgqegfbg=
